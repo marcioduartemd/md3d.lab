@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MD3D.LAB | Calculadora de Impressão 3D</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-2: #1d1d1d;
+      --border: #2b2b2b;
+      --gold: #ffc400;
+      --gold-hover: #e5b000;
+      --green: #0a7a22;
+      --green-bg: rgba(10, 122, 34, 0.18);
+      --red: #c60000;
+      --red-bg: rgba(198, 0, 0, 0.18);
+      --text: #f5f5f5;
+      --muted: #a0a0a0;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding: 20px 14px 48px;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding: 6px 2px;
+    }
+
+    .logo-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1.5px solid var(--gold);
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+    }
+
+    header p {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 9px 10px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--gold);
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .pill.active {
+      background: var(--gold);
+      color: #000;
+      border-color: var(--gold);
+    }
+
+    /* Resultado */
+    .result-card {
+      background: linear-gradient(145deg, #161616, #0d0d0d);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .price-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .price-main {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin: 4px 0 8px;
+    }
+
+    .profit-badge {
+      display: inline-block;
+      background: var(--green-bg);
+      color: #4ade80;
+      border: 1px solid var(--green);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .lote-box {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.88rem;
+      color: var(--text);
+      display: none;
+    }
+
+    .lote-box strong { color: var(--gold); }
+
+    /* Barra de composição */
+    .bar {
+      display: flex;
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: var(--surface-2);
+      margin: 14px 0;
+    }
+
+    .bar span { height: 100%; transition: width 0.3s; }
+    .b-fil { background: var(--gold); }
+    .b-ene { background: #22c55e; }
+    .b-maq { background: #3b82f6; }
+    .b-fal { background: var(--red); }
+    .b-emb { background: #a855f7; }
+
+    .breakdown {
+      list-style: none;
+      font-size: 0.88rem;
+    }
+
+    .breakdown li {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #1f1f1f;
+    }
+
+    .breakdown li:last-child { border-bottom: none; }
+
+    .dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 7px;
+    }
+
+    .total-cost-row {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--red-bg);
+      border: 1px solid var(--red);
+      border-radius: 9px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .btn-primary:hover { background: var(--gold-hover); }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--gold); }
+
+    details summary {
+      cursor: pointer;
+      list-style: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    details[open] summary { margin-bottom: 14px; }
+
+    .saved-note {
+      font-size: 0.74rem;
+      color: #4ade80;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .reset-link {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .card, .result-card { background: #fff; border: 1px solid #ccc; color: #000; }
+      .actions, details, .mode-switch, .pill-group { display: none !important; }
+      .price-main, header h1, .section-title { color: #000; }
+      .profit-badge, .total-cost-row { background: #f3f3f3; color: #000; border-color: #999; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-wrap" id="logoWrap">
+        <img src="logo.png" alt="Logo MD3D.LAB" onerror="renderFallbackLogo()" />
+      </div>
+      <div>
+        <h1>MD3D.LAB</h1>
+        <p>Calculadora de Custos &amp; Precificação 3D</p>
+      </div>
+    </header>
+
+    <!-- DADOS DA IMPRESSÃO -->
+    <div class="card">
+      <div class="section-title">Dados do Fatiamento</div>
+
+      <div class="mode-switch">
+        <button type="button" class="mode-btn active" id="btnLote" onclick="setMode('lote')">
+          Total da Mesa (Lote)
+        </button>
+        <button type="button" class="mode-btn" id="btnUnit" onclick="setMode('unitario')">
+          Por Peça (Unitário)
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="nomePeca">Nome da peça / projeto</label>
+        <input type="text" id="nomePeca" placeholder="Ex.: Árvore de Natal Espiral" oninput="calcular()" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="peso" id="labelPeso">Peso total na mesa (g)</label>
+          <input type="number" id="peso" step="0.01" value="65.55" oninput="calcular()" />
+        </div>
+        <div class="field">
+          <label for="qtd">Quantidade de peças</label>
+          <input type="number" id="qtd" min="1" step="1" value="2" oninput="calcular()" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="horas" id="labelHoras">Tempo total — Horas</label>
+          <input type="number" id="horas" min="0" step="1" value="5" oninput="calcular()" />
+        </div>
+        <div class="field">
+          <label for="minutos">Minutos</label>
+          <input type="number" id="minutos" min="0" max="59" step="1" value="47" oninput="calcular()" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Depreciação da máquina nesta peça</label>
+        <div class="pill-group" id="depGroup">
+          <button type="button" class="pill active" onclick="setDep(100, this)">100%</button>
+          <button type="button" class="pill" onclick="setDep(75, this)">75%</button>
+          <button type="button" class="pill" onclick="setDep(50, this)">50%</button>
+          <button type="button" class="pill" onclick="setDep(25, this)">25%</button>
+          <button type="button" class="pill" onclick="setDep(0, this)">0%</button>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom: 0;">
+        <label>Margem de lucro (Markup sobre o custo)</label>
+        <div class="pill-group" id="markupGroup">
+          <button type="button" class="pill" onclick="setMarkup(50, this)">50%</button>
+          <button type="button" class="pill" onclick="setMarkup(75, this)">75%</button>
+          <button type="button" class="pill active" onclick="setMarkup(100, this)">100%</button>
+          <button type="button" class="pill" onclick="setMarkup(150, this)">150%</button>
+          <button type="button" class="pill" onclick="setMarkup(200, this)">200%</button>
+        </div>
+        <input type="number" id="markupCustom" placeholder="Ou digite outro % (ex: 120)" style="margin-top:8px;" oninput="setMarkupCustom()" />
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="result-card">
+      <div class="price-label">Preço de venda sugerido (por peça)</div>
+      <div class="price-main" id="resPrecoUnit">R$ 0,00</div>
+      <div class="profit-badge" id="resLucroUnit">Lucro: R$ 0,00 / peça</div>
+      <div class="lote-box" id="resLoteBox"></div>
+    </div>
+
+    <!-- COMPOSIÇÃO -->
+    <div class="card">
+      <div class="section-title">Composição do Custo (1 peça)</div>
+      <div class="bar">
+        <span class="b-fil" id="barFil"></span>
+        <span class="b-ene" id="barEne"></span>
+        <span class="b-maq" id="barMaq"></span>
+        <span class="b-fal" id="barFal"></span>
+        <span class="b-emb" id="barEmb"></span>
+      </div>
+      <ul class="breakdown">
+        <li><span><i class="dot" style="background:var(--gold)"></i>Filamento (<span id="detPeso">0</span> g)</span><strong id="valFil">R$ 0,00</strong></li>
+        <li><span><i class="dot" style="background:#22c55e"></i>Energia (<span id="detTempo">0h</span>)</span><strong id="valEne">R$ 0,00</strong></li>
+        <li><span><i class="dot" style="background:#3b82f6"></i>Depreciação máquina</span><strong id="valMaq">R$ 0,00</strong></li>
+        <li><span><i class="dot" style="background:var(--red)"></i>Taxa de falha (<span id="detFalha">10</span>%)</span><strong id="valFal">R$ 0,00</strong></li>
+        <li><span><i class="dot" style="background:#a855f7"></i>Embalagem</span><strong id="valEmb">R$ 0,00</strong></li>
+      </ul>
+      <div class="total-cost-row">
+        <span>Custo real de 1 peça</span>
+        <span id="valCustoUnit">R$ 0,00</span>
+      </div>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="actions">
+      <button type="button" class="btn btn-primary" onclick="copiarResumo()">Copiar Orçamento</button>
+      <button type="button" class="btn btn-secondary" onclick="window.print()">Salvar PDF</button>
+    </div>
+
+    <!-- VALORES FIXOS (SALVOS LOCALMENTE) -->
+    <div class="card">
+      <details>
+        <summary>
+          <span>⚙ Meus Valores Fixos</span>
+          <span class="saved-note" id="savedNote">Salvo no seu navegador</span>
+        </summary>
+        <div class="grid-2">
+          <div class="field">
+            <label for="precoRolo">Preço do rolo (R$)</label>
+            <input type="number" id="precoRolo" step="0.01" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="pesoRolo">Peso do rolo (g)</label>
+            <input type="number" id="pesoRolo" step="1" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="tarifa">Tarifa energia (R$/kWh)</label>
+            <input type="number" id="tarifa" step="0.01" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="potencia">Potência média (W)</label>
+            <input type="number" id="potencia" step="1" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="valorMaq">Valor da impressora (R$)</label>
+            <input type="number" id="valorMaq" step="1" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="vidaUtil">Vida útil (horas)</label>
+            <input type="number" id="vidaUtil" step="100" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="embalagem">Embalagem por peça (R$)</label>
+            <input type="number" id="embalagem" step="0.1" oninput="salvarFixos()" />
+          </div>
+          <div class="field">
+            <label for="taxaFalha">Taxa de falha (%)</label>
+            <input type="number" id="taxaFalha" step="1" oninput="salvarFixos()" />
+          </div>
+        </div>
+        <button type="button" class="reset-link" onclick="resetarFixos()">Restaurar valores padrão</button>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULTS = {
+      precoRolo: 120,
+      pesoRolo: 1000,
+      tarifa: 1.03,
+      potencia: 120,
+      valorMaq: 4500,
+      vidaUtil: 5000,
+      embalagem: 3,
+      taxaFalha: 10
+    };
+
+    let mode = 'lote';
+    let depPct = 100;
+    let markupPct = 100;
+    let ultimoResumo = '';
+
+    function renderFallbackLogo() {
+      document.getElementById('logoWrap').innerHTML = `
+        <svg viewBox="0 0 100 100" width="56" height="56">
+          <rect width="100" height="100" fill="#000"/>
+          <rect x="6" y="6" width="42" height="42" rx="9" fill="#004d0f" stroke="#ffc400" stroke-width="4"/>
+          <rect x="52" y="6" width="42" height="42" rx="9" fill="#004d0f" stroke="#ffc400" stroke-width="4"/>
+          <rect x="6" y="52" width="42" height="42" rx="9" fill="#a80000" stroke="#ffc400" stroke-width="4"/>
+          <rect x="52" y="52" width="42" height="42" rx="9" fill="#a80000" stroke="#ffc400" stroke-width="4"/>
+          <text x="27" y="36" text-anchor="middle" fill="#ffc400" font-family="Arial Black,sans-serif" font-size="25" font-weight="900">M</text>
+          <text x="73" y="36" text-anchor="middle" fill="#ffc400" font-family="Arial Black,sans-serif" font-size="25" font-weight="900">D</text>
+          <text x="27" y="82" text-anchor="middle" fill="#ffc400" font-family="Arial Black,sans-serif" font-size="25" font-weight="900">3</text>
+          <text x="73" y="82" text-anchor="middle" fill="#ffc400" font-family="Arial Black,sans-serif" font-size="25" font-weight="900">D</text>
+        </svg>`;
+    }
+
+    function brl(v) {
+      return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function carregarFixos() {
+      const saved = JSON.parse(localStorage.getItem('md3d_fixos') || 'null') || DEFAULTS;
+      Object.keys(DEFAULTS).forEach(k => {
+        document.getElementById(k).value = saved[k] ?? DEFAULTS[k];
+      });
+    }
+
+    function salvarFixos() {
+      const data = {};
+      Object.keys(DEFAULTS).forEach(k => {
+        data[k] = parseFloat(document.getElementById(k).value) || 0;
+      });
+      localStorage.setItem('md3d_fixos', JSON.stringify(data));
+      calcular();
+    }
+
+    function resetarFixos() {
+      localStorage.removeItem('md3d_fixos');
+      carregarFixos();
+      calcular();
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('btnLote').classList.toggle('active', m === 'lote');
+      document.getElementById('btnUnit').classList.toggle('active', m === 'unitario');
+      document.getElementById('labelPeso').textContent = m === 'lote' ? 'Peso total na mesa (g)' : 'Peso de 1 peça (g)';
+      document.getElementById('labelHoras').textContent = m === 'lote' ? 'Tempo total — Horas' : 'Tempo de 1 peça — Horas';
+      calcular();
+    }
+
+    function setDep(val, btn) {
+      depPct = val;
+      document.querySelectorAll('#depGroup .pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      calcular();
+    }
+
+    function setMarkup(val, btn) {
+      markupPct = val;
+      document.getElementById('markupCustom').value = '';
+      document.querySelectorAll('#markupGroup .pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      calcular();
+    }
+
+    function setMarkupCustom() {
+      const v = parseFloat(document.getElementById('markupCustom').value);
+      if (!isNaN(v) && v >= 0) {
+        markupPct = v;
+        document.querySelectorAll('#markupGroup .pill').forEach(b => b.classList.remove('active'));
+        calcular();
+      }
+    }
+
+    function calcular() {
+      const pesoIn = parseFloat(document.getElementById('peso').value) || 0;
+      const qtd = Math.max(1, parseInt(document.getElementById('qtd').value) || 1);
+      const horas = parseFloat(document.getElementById('horas').value) || 0;
+      const minutos = parseFloat(document.getElementById('minutos').value) || 0;
+      const tempoIn = horas + (minutos / 60);
+
+      const pesoUnit = mode === 'lote' ? pesoIn / qtd : pesoIn;
+      const tempoUnit = mode === 'lote' ? tempoIn / qtd : tempoIn;
+
+      const precoRolo = parseFloat(document.getElementById('precoRolo').value) || 0;
+      const pesoRolo = parseFloat(document.getElementById('pesoRolo').value) || 1000;
+      const tarifa = parseFloat(document.getElementById('tarifa').value) || 0;
+      const potencia = parseFloat(document.getElementById('potencia').value) || 0;
+      const valorMaq = parseFloat(document.getElementById('valorMaq').value) || 0;
+      const vidaUtil = parseFloat(document.getElementById('vidaUtil').value) || 1;
+      const embalagem = parseFloat(document.getElementById('embalagem').value) || 0;
+      const taxaFalha = parseFloat(document.getElementById('taxaFalha').value) || 0;
+
+      const cFil = (pesoUnit / pesoRolo) * precoRolo;
+      const cEne = (potencia / 1000) * tempoUnit * tarifa;
+      const cMaq = (valorMaq / vidaUtil) * tempoUnit * (depPct / 100);
+      const sub = cFil + cEne + cMaq;
+      const cFal = sub * (taxaFalha / 100);
+      const custoUnit = sub + cFal + embalagem;
+
+      const precoUnit = custoUnit * (1 + markupPct / 100);
+      const lucroUnit = precoUnit - custoUnit;
+
+      document.getElementById('resPrecoUnit').textContent = brl(precoUnit);
+      document.getElementById('resLucroUnit').textContent = `Lucro: ${brl(lucroUnit)} / peça (markup ${markupPct}%)`;
+
+      const loteBox = document.getElementById('resLoteBox');
+      if (qtd > 1) {
+        loteBox.style.display = 'block';
+        loteBox.innerHTML = `Lote com <strong>${qtd} peças</strong>: Custo total ${brl(custoUnit * qtd)} • Venda total <strong>${brl(precoUnit * qtd)}</strong> • Lucro líquido <strong>${brl(lucroUnit * qtd)}</strong>`;
+      } else {
+        loteBox.style.display = 'none';
+      }
+
+      const hUnit = Math.floor(tempoUnit);
+      const mUnit = Math.round((tempoUnit - hUnit) * 60);
+      document.getElementById('detPeso').textContent = pesoUnit.toFixed(1);
+      document.getElementById('detTempo').textContent = `${hUnit}h${String(mUnit).padStart(2, '0')}`;
+      document.getElementById('detFalha').textContent = taxaFalha;
+
+      document.getElementById('valFil').textContent = brl(cFil);
+      document.getElementById('valEne').textContent = brl(cEne);
+      document.getElementById('valMaq').textContent = brl(cMaq);
+      document.getElementById('valFal').textContent = brl(cFal);
+      document.getElementById('valEmb').textContent = brl(embalagem);
+      document.getElementById('valCustoUnit').textContent = brl(custoUnit);
+
+      const safeTotal = custoUnit || 1;
+      document.getElementById('barFil').style.width = `${(cFil / safeTotal) * 100}%`;
+      document.getElementById('barEne').style.width = `${(cEne / safeTotal) * 100}%`;
+      document.getElementById('barMaq').style.width = `${(cMaq / safeTotal) * 100}%`;
+      document.getElementById('barFal').style.width = `${(cFal / safeTotal) * 100}%`;
+      document.getElementById('barEmb').style.width = `${(embalagem / safeTotal) * 100}%`;
+
+      const nome = document.getElementById('nomePeca').value.trim() || 'Peça 3D';
+      ultimoResumo = `*MD3D.LAB — Orçamento*\nProjeto: ${nome}\nQuantidade: ${qtd} un.\nValor unitário: ${brl(precoUnit)}` +
+        (qtd > 1 ? `\nTotal (${qtd} un.): ${brl(precoUnit * qtd)}` : '');
+    }
+
+    function copiarResumo() {
+      navigator.clipboard.writeText(ultimoResumo).then(() => {
+        const btn = document.querySelector('.btn-primary');
+        const orig = btn.textContent;
+        btn.textContent = 'Copiado!';
+        setTimeout(() => btn.textContent = orig, 1500);
+      });
+    }
+
+    carregarFixos();
+    calcular();
+  </script>
+</body>
+</html>
